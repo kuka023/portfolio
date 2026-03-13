@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>胡嘉凡 · AI Product Manager</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #1a1a26;
+      --border: rgba(255,255,255,0.08);
+      --accent: #7c6af7;
+      --accent2: #4fc3f7;
+      --accent3: #f472b6;
+      --text: #e8e8f0;
+      --text-muted: #8888a8;
+      --glow: rgba(124,106,247,0.35);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Inter','PingFang SC','Microsoft YaHei',sans-serif;
+      line-height: 1.6; overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+    /* Nav */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%; height: 64px;
+      background: rgba(10,10,15,0.75); backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; background: linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a { font-size: 0.88rem; color: var(--text-muted); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+
+    /* Hero */
+    #hero {
+      position: relative; min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 80px 5% 60px; overflow: hidden;
+    }
+    .hero-orb { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; }
+    .orb1 { width: 600px; height: 600px; background: rgba(124,106,247,0.18); top: -150px; left: -100px; }
+    .orb2 { width: 500px; height: 500px; background: rgba(79,195,247,0.12); bottom: -100px; right: -80px; }
+    .orb3 { width: 300px; height: 300px; background: rgba(244,114,182,0.1); top: 40%; left: 60%; }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(124,106,247,0.12); border: 1px solid rgba(124,106,247,0.3);
+      padding: 6px 16px; border-radius: 50px;
+      font-size: 0.8rem; color: var(--accent); margin-bottom: 2rem;
+      animation: fadeUp 0.6s ease both;
+    }
+    .hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none} }
+
+    h1 { font-size: clamp(2.8rem,7vw,5.5rem); font-weight: 800; line-height: 1.1; letter-spacing: -2px; animation: fadeUp 0.6s 0.1s ease both; }
+    .gradient-text { background: linear-gradient(135deg,#fff 30%,var(--accent) 60%,var(--accent2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-sub { font-size: clamp(1rem,2.5vw,1.2rem); color: var(--text-muted); margin-top: 1.2rem; max-width: 620px; line-height: 1.8; animation: fadeUp 0.6s 0.2s ease both; }
+    .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 2.5rem; animation: fadeUp 0.6s 0.3s ease both; }
+    .btn { padding: 12px 28px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.25s; }
+    .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 0 30px var(--glow); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px var(--glow); }
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { background: var(--surface2); transform: translateY(-2px); }
+
+    .hero-tags { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 2.5rem; animation: fadeUp 0.6s 0.4s ease both; }
+    .hero-tag { padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 500; background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); }
+
+    /* Section */
+    section { position: relative; z-index: 1; padding: 100px 5%; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 0.6rem; }
+    .section-title { font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 800; letter-spacing: -1px; margin-bottom: 1rem; }
+    .section-desc { color: var(--text-muted); max-width: 560px; }
+    .section-header { margin-bottom: 3.5rem; }
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* About */
+    #about .about-grid { display: grid; grid-template-columns: 300px 1fr; gap: 4rem; align-items: flex-start; max-width: 1100px; margin: 0 auto; }
+    .about-img-wrap {
+      position: relative; border-radius: 20px; overflow: hidden;
+      background: var(--surface2); border: 1px solid var(--border);
+      aspect-ratio: 3/4; width: 100%;
+    }
+    .avatar-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; background: linear-gradient(135deg,var(--surface2),rgba(124,106,247,0.1)); font-size: 5rem; }
+    .about-content p { color: var(--text-muted); margin-bottom: 1.2rem; line-height: 1.8; }
+    .edu-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 1.5rem; }
+    .edu-card {
+      padding: 14px 16px; border-radius: 12px;
+      background: var(--surface2); border: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .edu-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+    .edu-school { font-size: 0.9rem; font-weight: 700; }
+    .edu-major { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+    .edu-meta { font-size: 0.75rem; color: var(--accent); margin-top: 3px; font-weight: 600; }
+
+    /* Skills */
+    .skills-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1.5rem; }
+    .skill-tag {
+      padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 500;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text-muted); transition: all 0.2s;
+    }
+    .skill-tag:hover { border-color: var(--accent); color: var(--accent); background: rgba(124,106,247,0.08); }
+
+    /* Projects */
+    #projects { background: var(--surface); }
+    .proj-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(340px,1fr)); gap: 1.5rem; }
+    .proj-card { border-radius: 20px; overflow: hidden; background: var(--bg); border: 1px solid var(--border); transition: all 0.3s; cursor: pointer; }
+    .proj-card:hover { transform: translateY(-6px); border-color: rgba(124,106,247,0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+    .proj-thumb { height: 200px; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; position: relative; overflow: hidden; }
+    .proj-body { padding: 1.5rem; }
+    .proj-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0.8rem; }
+    .proj-tag { font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; font-weight: 600; background: rgba(124,106,247,0.15); color: var(--accent); }
+    .proj-tag.ai { background: rgba(79,195,247,0.15); color: var(--accent2); }
+    .proj-tag.pink { background: rgba(244,114,182,0.15); color: var(--accent3); }
+    .proj-body h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .proj-body p { font-size: 0.87rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 1.2rem; }
+    .proj-bullets { list-style: none; margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: 5px; }
+    .proj-bullets li { font-size: 0.82rem; color: var(--text-muted); display: flex; align-items: flex-start; gap: 6px; }
+    .proj-bullets li::before { content: '·'; color: var(--accent); flex-shrink: 0; }
+    .proj-footer { display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 1rem; }
+    .proj-link { display: flex; align-items: center; gap: 5px; font-size: 0.83rem; color: var(--accent); font-weight: 600; transition: gap 0.2s; }
+    .proj-link:hover { gap: 8px; }
+    .proj-status { font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
+    .status-live { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
+    .status-plan { background: rgba(244,114,182,0.12); color: var(--accent3); border: 1px solid rgba(244,114,182,0.25); }
+
+    /* Experience */
+    #experience { padding: 100px 5%; }
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(to bottom,var(--accent),transparent); }
+    .tl-item { position: relative; padding: 0 0 3rem 2rem; }
+    .tl-dot { position: absolute; left: -2.45rem; top: 6px; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 3px solid var(--bg); box-shadow: 0 0 12px var(--glow); }
+    .tl-date { font-size: 0.78rem; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; margin-bottom: 0.4rem; }
+    .tl-role { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .tl-company { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.8rem; }
+    .tl-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .tl-list li { font-size: 0.84rem; color: var(--text-muted); line-height: 1.7; display: flex; align-items: flex-start; gap: 8px; }
+    .tl-list li::before { content: '·'; color: var(--accent); flex-shrink: 0; font-size: 1rem; margin-top: -1px; }
+    .tl-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0.8rem; }
+    .tl-chip { font-size: 0.72rem; padding: 3px 10px; border-radius: 6px; background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+
+    /* Contact */
+    #contact { background: var(--surface); text-align: center; padding-bottom: 120px; }
+    .contact-card { max-width: 600px; margin: 0 auto; background: var(--bg); border: 1px solid var(--border); border-radius: 28px; padding: 3rem; }
+    .contact-links { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-top: 2rem; }
+    .contact-link { display: flex; align-items: center; gap: 10px; padding: 12px 22px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--border); font-size: 0.9rem; font-weight: 600; transition: all 0.2s; }
+    .contact-link:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+    footer { text-align: center; padding: 24px 5%; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted); }
+
+    @media (max-width: 900px) {
+      #about .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .about-img-wrap { max-width: 220px; aspect-ratio: 1; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">HJF · AIPM</div>
+  <div class="nav-links">
+    <a href="#about">关于我</a>
+    <a href="#projects">项目经历</a>
+    <a href="#experience">实习经历</a>
+    <a href="#contact">联系我</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+  <div class="hero-orb orb3"></div>
+
+  <div class="hero-badge">
+    <span class="dot"></span>
+    应届生 · 寻求 AI 产品经理机会
+  </div>
+
+  <h1>
+    <span class="gradient-text">胡嘉凡</span><br>
+    AI 产品经理
+  </h1>
+
+  <p class="hero-sub">
+    伦敦大学学院（UCL）健康数据科学 / CS 硕士在读，
+    数学本科背景，具备扎实数据分析与产品设计能力。
+    专注 AI 产品从 0 到 1 落地，有字节跳动与国泰君安实习经验。
+  </p>
+
+  <div class="hero-cta">
+    <a href="#projects" class="btn btn-primary">查看项目经历</a>
+    <a href="#contact" class="btn btn-outline">联系我 →</a>
+  </div>
+
+  <div class="hero-tags">
+    <span class="hero-tag">UCL 硕士在读</span>
+    <span class="hero-tag">字节跳动实习</span>
+    <span class="hero-tag">AI 产品设计</span>
+    <span class="hero-tag">Prompt 工程</span>
+    <span class="hero-tag">数据分析</span>
+    <span class="hero-tag">CFA Level 1</span>
+  </div>
+</section>
+
+<!-- About -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-img-wrap reveal">
+      <img src="微信图片_20250909001935_17_243.jpg" alt="胡嘉凡" style="width:100%;height:100%;object-fit:cover;object-position:center top;">
+    </div>
+    <div class="about-content reveal">
+      <span class="section-tag">About Me</span>
+      <h2 class="section-title">用数据思维<br>做 AI 产品</h2>
+      <p>数学与应用数学本科（利物浦大学，一等学位），目前在 UCL 攻读健康数据科学 / 计算机科学硕士，具备扎实的量化分析与机器学习基础。</p>
+      <p>有字节跳动产品经理与国泰君安证券数据产品两段实习，积累了从需求调研、PRD 撰写、A/B 实验设计到数据驱动迭代的完整产品方法论。</p>
+      <p>能与工程团队对齐技术方案，熟悉 Prompt Engineering 与 Agent 搭建，专注将 AI 能力转化为真实产品价值。</p>
+
+      <div class="edu-cards">
+        <div class="edu-card">
+          <div class="edu-icon">🎓</div>
+          <div>
+            <div class="edu-school">伦敦大学学院 UCL · 世界排名 Top 10</div>
+            <div class="edu-major">健康数据科学 | 计算机科学 · 硕士</div>
+            <div class="edu-meta">GPA 3.65/4.00 · 2024.06 – 2025.12 · 英国伦敦</div>
+          </div>
+        </div>
+        <div class="edu-card">
+          <div class="edu-icon">📐</div>
+          <div>
+            <div class="edu-school">利物浦大学</div>
+            <div class="edu-major">数学与应用数学 · 理学学士</div>
+            <div class="edu-meta">GPA 3.74/4.00 · 一等学位 · 2020.09 – 2024.06 · 英国利物浦</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="skills-list">
+        <span class="skill-tag">需求调研</span>
+        <span class="skill-tag">PRD 撰写</span>
+        <span class="skill-tag">原型设计</span>
+        <span class="skill-tag">A/B 测试</span>
+        <span class="skill-tag">数据分析</span>
+        <span class="skill-tag">Prompt 工程</span>
+        <span class="skill-tag">Agent 搭建</span>
+        <span class="skill-tag">竞品分析</span>
+        <span class="skill-tag">Python / SQL</span>
+        <span class="skill-tag">机器学习</span>
+        <span class="skill-tag">用户画像</span>
+        <span class="skill-tag">英语精通</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Projects -->
+<section id="projects">
+  <div class="section-inner">
+  <div class="section-header reveal">
+    <span class="section-tag">Projects</span>
+    <h2 class="section-title">项目经历</h2>
+    <p class="section-desc">三个独立主导的 AI 产品项目，从 0 到 1 定义、设计与落地。</p>
+  </div>
+  <div class="proj-grid">
+
+    <div class="proj-card reveal" onclick="location.href='project-stock-agent.html'">
+      <div class="proj-thumb" style="background:linear-gradient(135deg,#0a1020,#0d2040);position:relative">
+        📈
+        <span style="position:absolute;top:12px;left:12px;font-size:0.68rem;padding:3px 10px;border-radius:20px;background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.3);font-weight:700">✓ 已上线 v2.0</span>
+        <span style="position:absolute;top:12px;right:12px;font-size:0.68rem;color:var(--text-muted)">2026.01 – 2026.03</span>
+      </div>
+      <div class="proj-body">
+        <div class="proj-tags">
+          <span class="proj-tag">多 LLM</span>
+          <span class="proj-tag ai">Function Calling</span>
+          <span class="proj-tag">金融数据</span>
+        </div>
+        <h3>股票投资分析 Agent</h3>
+        <ul class="proj-bullets">
+          <li>自然语言 + 两层筛选引擎，从 5000+ 只股票快速定位机会，实时条件毫秒级 + 历史行为 10 只并发</li>
+          <li>两段式异动监控：盘前建档 + 30 秒轻量轮询，识别主力建仓/拉升/出货/洗盘 4 种行为，飞书实时推送</li>
+          <li>8 类数据并行调度，响应 2–3 秒，接口成功率从 70% 升至 95%，支持 14+ 模型切换</li>
+        </ul>
+        <div class="proj-footer">
+          <span class="proj-status status-live">✓ 已上线</span>
+          <a href="project-stock-agent.html" class="proj-link" onclick="event.stopPropagation()">查看详情 →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="proj-card reveal" onclick="location.href='project-ai-commerce.html'">
+      <div class="proj-thumb" style="background:linear-gradient(135deg,#200a18,#3d1030);position:relative">
+        🛍️
+        <span style="position:absolute;top:12px;left:12px;font-size:0.68rem;padding:3px 10px;border-radius:20px;background:rgba(244,114,182,0.15);color:#f472b6;border:1px solid rgba(244,114,182,0.3);font-weight:700">📋 AIGC 项目</span>
+        <span style="position:absolute;top:12px;right:12px;font-size:0.68rem;color:var(--text-muted)">2025.02 – 2025.05</span>
+      </div>
+      <div class="proj-body">
+        <div class="proj-tags">
+          <span class="proj-tag">AIGC</span>
+          <span class="proj-tag ai">图像生成</span>
+          <span class="proj-tag pink">电商</span>
+        </div>
+        <h3>电商 AIGC · 商品内容生成平台</h3>
+        <ul class="proj-bullets">
+          <li>深度访谈 10+ 家商家，发现 70% 依赖外部美工、制作周期长的核心痛点，明确"一句话 + 产品图生成详情页/短视频"核心场景</li>
+          <li>设计全链路产品流程，整合 Stable Diffusion（背景生成）、U²-Net（抠图）、GPT（文案微调）三大模型，输出 PRD 与交互原型</li>
+          <li>建立 CLIP Score + 人工评审双维度评估体系，A/B 测试优化提示词模板，风格匹配准确率提升至 85%，制作周期从 3 天缩短至 2 分钟</li>
+        </ul>
+        <div class="proj-footer">
+          <span class="proj-status status-plan">📋 已完成方案</span>
+          <a href="project-ai-commerce.html" class="proj-link" onclick="event.stopPropagation()">查看详情 →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="proj-card reveal" onclick="location.href='project-feishu-ai.html'">
+      <div class="proj-thumb" style="background:linear-gradient(135deg,#08080f,#0a1020);position:relative">
+        🤖
+        <span style="position:absolute;top:12px;left:12px;font-size:0.68rem;padding:3px 10px;border-radius:20px;background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.3);font-weight:700">✓ 已上线</span>
+        <span style="position:absolute;top:12px;right:12px;font-size:0.68rem;color:var(--text-muted)">2025.10 – 至今</span>
+      </div>
+      <div class="proj-body">
+        <div class="proj-tags">
+          <span class="proj-tag">飞书 Bot</span>
+          <span class="proj-tag ai">OpenClaw</span>
+          <span class="proj-tag" style="background:rgba(6,182,212,0.15);color:#06b6d4">SkillHub</span>
+        </div>
+        <h3>飞书 AI 助手 · OpenClaw + SkillHub</h3>
+        <ul class="proj-bullets">
+          <li>在飞书部署 OpenClaw AI 助手，接入腾讯 SkillHub 扩展 5+ 自定义技能（股票分析、图表绘制、资讯摘要等）</li>
+          <li>设计结构化每日 A 股早报（板块逻辑 + 推荐股票 + 入场/止盈/止损 + 深度分析），每日定时自动推送</li>
+          <li>与 Stock Agent Web 端形成互补产品矩阵：飞书负责主动触达，Web 负责深度研究</li>
+        </ul>
+        <div class="proj-footer">
+          <span class="proj-status status-live">✓ 已上线</span>
+          <a href="project-feishu-ai.html" class="proj-link" onclick="event.stopPropagation()">查看详情 →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  </div>
+</section>
+
+<!-- Experience -->
+<section id="experience">
+  <div class="section-inner">
+  <div class="section-header reveal">
+    <span class="section-tag">Experience</span>
+    <h2 class="section-title">实习经历</h2>
+  </div>
+  <div class="timeline">
+
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">2025.10 — 2025.12</div>
+      <div class="tl-role">产品经理实习</div>
+      <div class="tl-company">字节跳动</div>
+      <ul class="tl-list">
+        <li>独立负责抖音、快手、Bilibili 信息流分发策略竞品分析，从用户体验、内容多样性、商业化植入三维度深度拆解，提出 3 项可落地优化建议</li>
+        <li>主导今日头条用户反馈洞察项目，清洗聚类 300+ 条有效反馈，梳理 5 大类体验痛点，定位 Top3 核心问题，为产品迭代提供数据支撑</li>
+        <li>独立设计"兴趣圈"新功能 0-1 冷启动方案，制定首批 200 名种子用户招募计划，建立次日留存、人均互动数等 4 项关键评估指标</li>
+        <li>主导"抖音商城"入口 A/B 测试方案设计，提出图标强化与动态文案两大实验方向，明确流量分配规则与核心评估指标（CTR 提升 > 10%）</li>
+      </ul>
+      <div class="tl-chips">
+        <span class="tl-chip">竞品分析</span>
+        <span class="tl-chip">用户洞察</span>
+        <span class="tl-chip">冷启动</span>
+        <span class="tl-chip">A/B 测试</span>
+        <span class="tl-chip">PRD 撰写</span>
+      </div>
+    </div>
+
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">2024.08 — 2024.11</div>
+      <div class="tl-role">行研实习（数据产品方向）</div>
+      <div class="tl-company">国泰君安证券</div>
+      <ul class="tl-list">
+        <li>调研 6 大行业 20+ 份 REITs 报告，提炼收益率、杠杆率、政策风险等核心指标，构建行业对比矩阵，明确 3 大核心用户场景</li>
+        <li>从 0 到 1 设计搭建上交所 REITs 产品数据库（Excel），设计动态透视看板与风险预警规则，将投研流程效率提升 20%，实现数据实时监控</li>
+        <li>组织 10+ 场投研会议，输出结构化纪要与《REITs 月度策略报告》，将用户反馈转化为迭代需求，推动工具持续优化</li>
+      </ul>
+      <div class="tl-chips">
+        <span class="tl-chip">数据产品</span>
+        <span class="tl-chip">REITs</span>
+        <span class="tl-chip">量化分析</span>
+        <span class="tl-chip">看板设计</span>
+      </div>
+    </div>
+
+  </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section id="contact">
+  <div class="contact-card reveal">
+    <span class="section-tag">Contact</span>
+    <h2 class="section-title">欢迎联系我</h2>
+    <p style="color:var(--text-muted);margin-top:0.8rem;font-size:0.95rem">
+      正在寻求 AI 产品经理相关实习 / 校招机会，欢迎交流。
+    </p>
+    <div class="contact-links">
+      <a href="mailto:ab2930170701@126.com" class="contact-link">
+        📧 ab2930170701@126.com
+      </a>
+      <a href="#" class="contact-link">
+        💬 微信：13667190979
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 胡嘉凡 · UCL 健康数据科学 / CS 硕士 · AI Product Manager</p>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        e.target.style.transitionDelay = (i * 0.06) + 's';
+        e.target.classList.add('visible');
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    const pos = window.scrollY + 100;
+    sections.forEach(s => {
+      if (pos >= s.offsetTop && pos < s.offsetTop + s.offsetHeight) {
+        navLinks.forEach(l => l.style.color = '');
+        const active = document.querySelector(`.nav-links a[href="#${s.id}"]`);
+        if (active) active.style.color = 'var(--accent)';
+      }
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 商品内容生成平台 · 胡嘉凡</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #1a1a26;
+      --border: rgba(255,255,255,0.08);
+      --accent: #f472b6;
+      --accent2: #fb923c;
+      --accent3: #a78bfa;
+      --text: #e8e8f0;
+      --text-muted: #8888a8;
+      --glow: rgba(244,114,182,0.3);
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter','PingFang SC','Microsoft YaHei',sans-serif; line-height: 1.6; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+    /* Nav */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%; height: 64px;
+      background: rgba(10,10,15,0.8); backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-left { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-back {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.85rem; color: var(--text-muted); transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--accent); }
+    .nav-title { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+    .nav-tag {
+      font-size: 0.72rem; padding: 3px 10px; border-radius: 20px;
+      background: rgba(244,114,182,0.15); color: var(--accent);
+      border: 1px solid rgba(244,114,182,0.3); font-weight: 600;
+    }
+
+    /* Hero */
+    #hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      padding: 100px 5% 60px; position: relative; overflow: hidden;
+    }
+    .orb { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+    .o1 { width: 700px; height: 700px; background: rgba(244,114,182,0.12); top: -200px; right: -100px; }
+    .o2 { width: 500px; height: 500px; background: rgba(251,146,60,0.1); bottom: -100px; left: -80px; }
+    .o3 { width: 300px; height: 300px; background: rgba(167,139,250,0.1); top: 50%; left: 50%; transform: translate(-50%,-50%); }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(244,114,182,0.1); border: 1px solid rgba(244,114,182,0.3);
+      padding: 6px 16px; border-radius: 50px;
+      font-size: 0.8rem; color: var(--accent); margin-bottom: 2rem;
+      animation: fadeUp 0.5s ease both;
+    }
+    .hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none} }
+
+    h1 { font-size: clamp(2.4rem,6vw,4.8rem); font-weight: 800; letter-spacing: -2px; line-height: 1.1; animation: fadeUp 0.5s 0.1s ease both; }
+    .grad { background: linear-gradient(135deg, #fff 30%, var(--accent) 60%, var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-sub { font-size: 1.1rem; color: var(--text-muted); max-width: 640px; margin: 1.2rem auto 0; animation: fadeUp 0.5s 0.2s ease both; }
+    .hero-metrics {
+      display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;
+      margin-top: 3rem; animation: fadeUp 0.5s 0.3s ease both;
+    }
+    .metric {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 1.2rem 1.8rem; text-align: center;
+    }
+    .metric-num { font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .metric-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* Section */
+    section { position: relative; z-index: 1; padding: 90px 5%; }
+    .section-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 0.6rem; }
+    .section-title { font-size: clamp(1.6rem,3.5vw,2.4rem); font-weight: 800; letter-spacing: -1px; margin-bottom: 0.8rem; }
+    .section-desc { color: var(--text-muted); max-width: 560px; }
+    .section-header { margin-bottom: 3rem; }
+
+    /* Reveal */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease, transform 0.5s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* Pipeline */
+    #pipeline { background: var(--surface); }
+    .pipeline-flow {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; flex-wrap: wrap; margin-top: 1rem;
+    }
+    .pipe-step {
+      flex: 1; min-width: 160px; max-width: 220px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.5rem 1rem;
+      text-align: center; position: relative;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .pipe-step:hover { border-color: var(--accent); transform: translateY(-4px); }
+    .pipe-icon { font-size: 2rem; margin-bottom: 0.6rem; display: block; }
+    .pipe-step h4 { font-size: 0.88rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .pipe-step p { font-size: 0.75rem; color: var(--text-muted); }
+    .pipe-arrow {
+      font-size: 1.2rem; color: var(--text-muted); padding: 0 0.5rem;
+      flex-shrink: 0;
+    }
+
+    /* Demo showcase */
+    #demo .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+    .demo-input-card, .demo-output-card {
+      border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--border); background: var(--surface);
+    }
+    .card-header {
+      padding: 0.8rem 1.2rem; display: flex; align-items: center; gap: 8px;
+      background: var(--surface2); border-bottom: 1px solid var(--border);
+      font-size: 0.82rem; font-weight: 600; color: var(--text-muted);
+    }
+    .card-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .card-body { padding: 1.5rem; }
+    .input-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
+    .input-text {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px; font-size: 0.9rem;
+      color: var(--text); margin-bottom: 1rem; line-height: 1.6;
+    }
+    .input-img-placeholder {
+      background: var(--bg); border: 1px dashed var(--border); border-radius: 10px;
+      height: 120px; display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; color: var(--text-muted); gap: 8px;
+    }
+    .platform-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; }
+    .platform-chip {
+      font-size: 0.75rem; padding: 4px 12px; border-radius: 20px;
+      background: rgba(244,114,182,0.1); border: 1px solid rgba(244,114,182,0.25);
+      color: var(--accent); font-weight: 600;
+    }
+    .generate-btn {
+      width: 100%; margin-top: 1.2rem; padding: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none; border-radius: 10px; color: #fff; font-size: 0.9rem;
+      font-weight: 700; cursor: pointer; transition: opacity 0.2s, transform 0.2s;
+    }
+    .generate-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .output-tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .out-tab {
+      flex: 1; padding: 10px; text-align: center; font-size: 0.8rem;
+      color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .out-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .output-content { padding: 1.5rem; }
+    .product-img-mockup {
+      background: linear-gradient(135deg, var(--surface2), rgba(244,114,182,0.08));
+      border-radius: 12px; height: 160px; display: flex; align-items: center;
+      justify-content: center; font-size: 3rem; margin-bottom: 1rem;
+      border: 1px solid var(--border); position: relative; overflow: hidden;
+    }
+    .product-img-mockup::after {
+      content: 'AI 场景图'; position: absolute; bottom: 8px; right: 10px;
+      font-size: 0.7rem; color: var(--accent); font-weight: 600;
+    }
+    .copy-text { font-size: 0.83rem; color: var(--text-muted); line-height: 1.8; }
+    .copy-highlight { color: var(--text); font-weight: 600; }
+    .copy-badge { display: inline-block; font-size: 0.7rem; padding: 2px 8px; border-radius: 6px; background: rgba(244,114,182,0.15); color: var(--accent); margin-left: 6px; }
+
+    .video-mockup {
+      background: #000; border-radius: 12px; height: 180px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 1px solid var(--border); gap: 8px;
+    }
+    .video-play { width: 48px; height: 48px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .video-label { font-size: 0.78rem; color: var(--text-muted); }
+    .video-timeline {
+      margin-top: 12px; background: var(--surface2); border-radius: 4px; height: 4px; position: relative; overflow: hidden;
+    }
+    .timeline-fill { height: 100%; width: 40%; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+    .video-scenes { display: flex; gap: 8px; margin-top: 10px; }
+    .scene-thumb { flex: 1; height: 40px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+
+    /* Tech choices */
+    #tech { background: var(--surface); }
+    .tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.2rem; }
+    .tech-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem;
+      transition: all 0.3s;
+    }
+    .tech-card:hover { border-color: rgba(244,114,182,0.4); transform: translateY(-3px); }
+    .tech-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+    .tech-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .tech-category { font-size: 0.72rem; color: var(--text-muted); }
+    .tech-card h4 { font-size: 0.95rem; font-weight: 700; }
+    .tech-vs { display: flex; gap: 8px; margin: 1rem 0; }
+    .vs-item {
+      flex: 1; padding: 8px 10px; border-radius: 8px; font-size: 0.75rem;
+    }
+    .vs-lose { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.15); }
+    .vs-win { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); }
+    .vs-label { font-weight: 700; margin-bottom: 3px; }
+    .vs-lose .vs-label { color: #f87171; }
+    .vs-win .vs-label { color: #4ade80; }
+    .vs-desc { color: var(--text-muted); line-height: 1.5; }
+    .why-box {
+      background: rgba(244,114,182,0.06); border: 1px solid rgba(244,114,182,0.2);
+      border-radius: 8px; padding: 10px 12px; font-size: 0.78rem;
+      color: var(--text-muted); line-height: 1.6;
+    }
+    .why-box strong { color: var(--accent); }
+
+    /* Metrics impact */
+    #impact .impact-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.2rem; }
+    .impact-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 1.5rem; text-align: center; transition: all 0.3s;
+    }
+    .impact-card:hover { transform: translateY(-4px); border-color: rgba(244,114,182,0.4); }
+    .impact-before { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; text-decoration: line-through; }
+    .impact-arrow { font-size: 1.5rem; margin: 6px 0; }
+    .impact-after { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .impact-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; }
+
+    /* Architecture */
+    #arch { background: var(--surface); }
+    .arch-layers { display: flex; flex-direction: column; gap: 1rem; max-width: 860px; margin: 0 auto; }
+    .arch-layer { border-radius: 14px; padding: 1.2rem 1.5rem; border: 1px solid var(--border); }
+    .arch-layer-title { font-size: 0.8rem; font-weight: 700; margin-bottom: 0.8rem; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+    .arch-modules { display: flex; flex-wrap: wrap; gap: 8px; }
+    .arch-module {
+      padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 600;
+      background: var(--surface2); border: 1px solid var(--border);
+    }
+
+    /* Stages */
+    .stages { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.2rem; }
+    .stage-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 1.5rem; transition: all 0.3s;
+    }
+    .stage-card:hover { transform: translateY(-3px); border-color: rgba(244,114,182,0.4); }
+    .stage-num { font-size: 2rem; font-weight: 900; color: rgba(244,114,182,0.2); margin-bottom: 0.5rem; }
+    .stage-card h4 { font-size: 0.98rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .stage-card p { font-size: 0.83rem; color: var(--text-muted); line-height: 1.7; }
+    .stage-items { list-style: none; margin-top: 0.8rem; display: flex; flex-direction: column; gap: 4px; }
+    .stage-items li { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: flex-start; gap: 6px; }
+    .stage-items li::before { content: '·'; color: var(--accent); font-size: 1rem; flex-shrink: 0; margin-top: -1px; }
+
+    /* Footer */
+    .page-footer {
+      text-align: center; padding: 60px 5%;
+      border-top: 1px solid var(--border);
+    }
+    .footer-nav { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .footer-btn {
+      padding: 10px 22px; border-radius: 10px; font-size: 0.88rem; font-weight: 600;
+      border: 1px solid var(--border); background: var(--surface2); transition: all 0.2s;
+    }
+    .footer-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+    .footer-btn.primary { background: var(--accent); color: #fff; border-color: transparent; }
+    .footer-btn.primary:hover { opacity: 0.9; color: #fff; }
+
+    @media(max-width:768px){
+      #demo .demo-grid { grid-template-columns: 1fr; }
+      .tech-vs { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-left">
+    <a href="index.html" class="nav-back">← 返回</a>
+    <span style="color:var(--border)">|</span>
+    <span class="nav-title">AI 商品内容生成平台</span>
+  </div>
+  <span class="nav-tag">PRD · 技术方案</span>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+
+  <div class="hero-badge"><span class="dot"></span>AI AIPM 项目 · 产品规划阶段</div>
+
+  <h1><span class="grad">一句话 + 产品图</span><br>自动生成内容全套</h1>
+  <p class="hero-sub">
+    商家只需输入一句话和产品主图，AI 自动生成场景化商品图、平台风格详情页、短视频，
+    将内容制作周期从 <strong style="color:var(--text)">3 天压缩至 2 分钟</strong>。
+  </p>
+
+  <div class="hero-metrics">
+    <div class="metric">
+      <div class="metric-num">3天→2分钟</div>
+      <div class="metric-label">内容制作时长</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">85%</div>
+      <div class="metric-label">平台风格匹配率</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">300%</div>
+      <div class="metric-label">内容生产效率提升</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">4</div>
+      <div class="metric-label">平台风格支持</div>
+    </div>
+  </div>
+</section>
+
+<!-- Pipeline -->
+<section id="pipeline">
+  <div class="section-header reveal">
+    <span class="section-tag">Workflow</span>
+    <h2 class="section-title">核心生成流程</h2>
+    <p class="section-desc">端到端五步流水线，从商家输入到可投放内容全自动化。</p>
+  </div>
+
+  <div class="pipeline-flow reveal">
+    <div class="pipe-step">
+      <span class="pipe-icon">📝</span>
+      <h4>商家输入</h4>
+      <p>一句话描述 + 产品主图 + 目标平台选择</p>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <span class="pipe-icon">✂️</span>
+      <h4>商品抠图</h4>
+      <p>U²-Net 高精度去背，秒级完成，边缘干净</p>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <span class="pipe-icon">🖼️</span>
+      <h4>场景图生成</h4>
+      <p>SDXL + ControlNet 生成多版场景化主图</p>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <span class="pipe-icon">📄</span>
+      <h4>详情页文案</h4>
+      <p>LLM 按平台风格生成结构化文案与卖点</p>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <span class="pipe-icon">🎬</span>
+      <h4>短视频生成</h4>
+      <p>模板化剪辑流水线，字幕/配音自动生成</p>
+    </div>
+  </div>
+</section>
+
+<!-- Demo -->
+<section id="demo">
+  <div class="section-header reveal">
+    <span class="section-tag">Demo</span>
+    <h2 class="section-title">交互预期演示</h2>
+    <p class="section-desc">展示商家实际操作界面与 AI 输出成果的预期效果。</p>
+  </div>
+
+  <div class="demo-grid reveal">
+    <!-- Input -->
+    <div class="demo-input-card">
+      <div class="card-header">
+        <div class="card-dot" style="background:#f87171"></div>
+        <div class="card-dot" style="background:#fbbf24"></div>
+        <div class="card-dot" style="background:#4ade80"></div>
+        <span style="margin-left:6px">商家输入面板</span>
+      </div>
+      <div class="card-body">
+        <div class="input-label">一句话描述你的产品</div>
+        <div class="input-text">
+          ✍️ 这是一款轻奢感的女士真皮手提包，焦糖棕色，适合通勤和约会场合，高级感强……
+        </div>
+
+        <div class="input-label">上传产品主图</div>
+        <div class="input-img-placeholder">
+          📷 拖拽或点击上传主图（白底/实拍均可）
+        </div>
+
+        <div class="input-label" style="margin-top:1rem">目标投放平台</div>
+        <div class="platform-chips">
+          <span class="platform-chip" style="background:rgba(255,88,88,0.15);color:#f87171;border-color:rgba(255,88,88,0.3)">小红书种草</span>
+          <span class="platform-chip">淘宝详情页</span>
+          <span class="platform-chip" style="background:rgba(251,146,60,0.15);color:var(--accent2);border-color:rgba(251,146,60,0.3)">抖音短视频</span>
+          <span class="platform-chip" style="background:rgba(167,139,250,0.15);color:var(--accent3);border-color:rgba(167,139,250,0.3)">京东图文</span>
+        </div>
+
+        <button class="generate-btn">✨ 一键生成全套内容</button>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="demo-output-card">
+      <div class="card-header">
+        <div class="card-dot" style="background:#f87171"></div>
+        <div class="card-dot" style="background:#fbbf24"></div>
+        <div class="card-dot" style="background:#4ade80"></div>
+        <span style="margin-left:6px">AI 生成结果</span>
+        <span style="margin-left:auto;font-size:0.72rem;color:#4ade80">✓ 生成完成 · 约 1m 52s</span>
+      </div>
+
+      <div class="output-tabs">
+        <div class="out-tab active">🖼️ 商品图</div>
+        <div class="out-tab">📄 详情文案</div>
+        <div class="out-tab">🎬 短视频</div>
+      </div>
+
+      <div class="output-content">
+        <!-- Tab 1: Product Images -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">
+          <div class="product-img-mockup" style="height:120px">👜</div>
+          <div class="product-img-mockup" style="height:120px;background:linear-gradient(135deg,var(--surface2),rgba(251,146,60,0.08))">👜<span style="position:absolute;bottom:8px;right:10px;font-size:0.7rem;color:var(--accent2)">咖啡馆场景</span></div>
+          <div class="product-img-mockup" style="height:120px;background:linear-gradient(135deg,var(--surface2),rgba(167,139,250,0.08))">👜<span style="position:absolute;bottom:8px;right:10px;font-size:0.7rem;color:var(--accent3)">办公场景</span></div>
+          <div class="product-img-mockup" style="height:120px;background:linear-gradient(135deg,var(--surface2),rgba(34,197,94,0.06))">👜<span style="position:absolute;bottom:8px;right:10px;font-size:0.7rem;color:#4ade80">白底图</span></div>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-muted);text-align:center">已生成 4 张场景图 · 点击可查看大图与下载</div>
+
+        <!-- Hidden tab content hint -->
+        <div style="margin-top:1.2rem;padding:1rem;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
+          <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem">小红书种草文案预览 ↓</div>
+          <div class="copy-text">
+            <span class="copy-highlight">✨ 找到了！通勤包里的天花板</span>
+            <span class="copy-badge">小红书风格</span><br><br>
+            最近入了这个焦糖棕真皮手提包，简直太绝了🤍 每次背出门都被问链接…
+            真皮质感超好，包体挺括有型，放 A4 文件、iPad、化妆品完全 ok~
+            <br><br>
+            <span style="color:var(--accent)">// 标签：#通勤包 #手提包推荐 #真皮包包 #轻奢风</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tech Choices -->
+<section id="tech">
+  <div class="section-header reveal">
+    <span class="section-tag">Tech Decisions</span>
+    <h2 class="section-title">核心技术选型对比</h2>
+    <p class="section-desc">为什么这样选——每个模块的对比依据与业务 KPI 对齐逻辑。</p>
+  </div>
+
+  <div class="tech-grid">
+
+    <div class="tech-card reveal">
+      <div class="tech-header">
+        <div class="tech-icon" style="background:rgba(244,114,182,0.15)">🧠</div>
+        <div>
+          <div class="tech-category">文案生成 LLM</div>
+          <h4>开源微调 vs 闭源 API</h4>
+        </div>
+      </div>
+      <div class="tech-vs">
+        <div class="vs-item vs-lose">
+          <div class="vs-label">✗ 闭源 API</div>
+          <div class="vs-desc">高质量但成本高、数据出域、风格漂移难固化</div>
+        </div>
+        <div class="vs-item vs-win">
+          <div class="vs-label">✓ 开源微调</div>
+          <div class="vs-desc">可私有化、风格可固化、边际成本低、可 A/B</div>
+        </div>
+      </div>
+      <div class="why-box"><strong>选择理由：</strong>85% 平台风格匹配率 + 高并发 + 成本可控，用 Qwen 基座 + 指令微调 + 模板词库；闭源保留为兜底</div>
+    </div>
+
+    <div class="tech-card reveal">
+      <div class="tech-header">
+        <div class="tech-icon" style="background:rgba(251,146,60,0.15)">🖼️</div>
+        <div>
+          <div class="tech-category">商品图生成</div>
+          <h4>SDXL+ControlNet vs 闭源文生图</h4>
+        </div>
+      </div>
+      <div class="tech-vs">
+        <div class="vs-item vs-lose">
+          <div class="vs-label">✗ MJ / DALL·E</div>
+          <div class="vs-desc">创意强但不可复现、版权模糊、批量难工程化</div>
+        </div>
+        <div class="vs-item vs-win">
+          <div class="vs-label">✓ SDXL + LoRA</div>
+          <div class="vs-desc">强可控、可复现、可批量、风格一致、可私有化</div>
+        </div>
+      </div>
+      <div class="why-box"><strong>选择理由：</strong>固定 seed/构图模板保证批量一致性；LoRA 沉淀品牌资产，满足 2 分钟批量出图要求</div>
+    </div>
+
+    <div class="tech-card reveal">
+      <div class="tech-header">
+        <div class="tech-icon" style="background:rgba(167,139,250,0.15)">✂️</div>
+        <div>
+          <div class="tech-category">商品抠图</div>
+          <h4>U²-Net vs SAM（通用大模型）</h4>
+        </div>
+      </div>
+      <div class="tech-vs">
+        <div class="vs-item vs-lose">
+          <div class="vs-label">✗ SAM</div>
+          <div class="vs-desc">泛化强但推理重，难满足"秒级/高并发"要求</div>
+        </div>
+        <div class="vs-item vs-win">
+          <div class="vs-label">✓ U²-Net</div>
+          <div class="vs-desc">速度/精度/资源平衡最优，边缘干净，工程稳定</div>
+        </div>
+      </div>
+      <div class="why-box"><strong>选择理由：</strong>规则拍摄商品图分布下 mIoU 足够，秒级完成；极端场景触阈 → 升级策略或人工审核</div>
+    </div>
+
+    <div class="tech-card reveal">
+      <div class="tech-header">
+        <div class="tech-icon" style="background:rgba(34,197,94,0.15)">🎬</div>
+        <div>
+          <div class="tech-category">短视频生成</div>
+          <h4>模板流水线 vs 端到端文生视频</h4>
+        </div>
+      </div>
+      <div class="tech-vs">
+        <div class="vs-item vs-lose">
+          <div class="vs-label">✗ 端到端生视频</div>
+          <div class="vs-desc">创意强但渲染慢、稳定性差，难达"2分钟出片"</div>
+        </div>
+        <div class="vs-item vs-win">
+          <div class="vs-label">✓ 模板化剪辑</div>
+          <div class="vs-desc">确定性强、渲染快、可规模化、品牌模板可复用</div>
+        </div>
+      </div>
+      <div class="why-box"><strong>选择理由：</strong>完全贴合 KPI（时延/成本/可控/复用）；Runway Gen-3 等前沿模型作为灰度升级通道</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Impact -->
+<section id="impact">
+  <div class="section-header reveal">
+    <span class="section-tag">Expected Impact</span>
+    <h2 class="section-title">预期成果指标</h2>
+  </div>
+  <div class="impact-grid">
+    <div class="impact-card reveal">
+      <div class="impact-before">3 天</div>
+      <div class="impact-arrow">↓</div>
+      <div class="impact-after">2 分钟</div>
+      <div class="impact-desc">单套内容制作时长</div>
+    </div>
+    <div class="impact-card reveal">
+      <div class="impact-before">60%+ 人工参与</div>
+      <div class="impact-arrow">↓</div>
+      <div class="impact-after">85%</div>
+      <div class="impact-desc">平台风格匹配率（AI 自动）</div>
+    </div>
+    <div class="impact-card reveal">
+      <div class="impact-before">单张 ¥200~500</div>
+      <div class="impact-arrow">↓</div>
+      <div class="impact-after">90% ↓</div>
+      <div class="impact-desc">拍摄 / 设计成本</div>
+    </div>
+    <div class="impact-card reveal">
+      <div class="impact-before">1 套</div>
+      <div class="impact-arrow">→</div>
+      <div class="impact-after">4 平台</div>
+      <div class="impact-desc">一次输入，多平台风格适配</div>
+    </div>
+    <div class="impact-card reveal">
+      <div class="impact-before">串行流程</div>
+      <div class="impact-arrow">→</div>
+      <div class="impact-after">并行推理</div>
+      <div class="impact-desc">图文视频同步生成</div>
+    </div>
+    <div class="impact-card reveal">
+      <div class="impact-before">人工拼合</div>
+      <div class="impact-arrow">→</div>
+      <div class="impact-after">秒级</div>
+      <div class="impact-desc">商品抠图完成时间</div>
+    </div>
+  </div>
+</section>
+
+<!-- Stages -->
+<section id="stages">
+  <div class="section-header reveal">
+    <span class="section-tag">Product Process</span>
+    <h2 class="section-title">产品推进阶段</h2>
+  </div>
+  <div class="stages">
+    <div class="stage-card reveal">
+      <div class="stage-num">01</div>
+      <h4>需求调研与定义</h4>
+      <p>深入理解商家实际工作流，避免技术驱动脱节。</p>
+      <ul class="stage-items">
+        <li>10-15 家商家深度访谈，挖掘真实痛点</li>
+        <li>竞品分析（Canva / PhotoRoom / CapCut）</li>
+        <li>按品类 × 平台分类场景需求</li>
+        <li>确定商家对生成质量的接受底线</li>
+      </ul>
+    </div>
+    <div class="stage-card reveal">
+      <div class="stage-num">02</div>
+      <h4>系统流程设计</h4>
+      <p>将需求拆解为可执行的产品流程与功能架构。</p>
+      <ul class="stage-items">
+        <li>五步端到端流水线设计</li>
+        <li>信息架构（Dashboard / 工作台 / 素材库）</li>
+        <li>质量评估体系与回退机制</li>
+        <li>多平台风格模板规格定义</li>
+      </ul>
+    </div>
+    <div class="stage-card reveal">
+      <div class="stage-num">03</div>
+      <h4>技术方案选型</h4>
+      <p>以 KPI 为锚点，逐类对比并给出"为什么这样选"。</p>
+      <ul class="stage-items">
+        <li>文案 LLM：开源微调 vs 闭源 API</li>
+        <li>图像：SDXL+ControlNet vs MJ/DALL·E</li>
+        <li>抠图：U²-Net vs SAM</li>
+        <li>视频：模板化流水线 vs 端到端文生视频</li>
+      </ul>
+    </div>
+    <div class="stage-card reveal">
+      <div class="stage-num">04</div>
+      <h4>评测与迭代闭环</h4>
+      <p>建立离线 + 在线双层评估，持续自动化迭代。</p>
+      <ul class="stage-items">
+        <li>离线：CLIP Score / 要点覆盖率 / 敏感词率</li>
+        <li>在线：CTR / 加购率 / 二改率</li>
+        <li>双层过滤（禁词 + 图像瑕疵）+ 质量阈值回退</li>
+        <li>A/B 测试 AI 生成 vs 人工制作效果</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Architecture -->
+<section id="arch">
+  <div class="section-header reveal">
+    <span class="section-tag">Architecture</span>
+    <h2 class="section-title">系统架构分层</h2>
+  </div>
+  <div class="arch-layers reveal">
+    <div class="arch-layer" style="border-color:rgba(244,114,182,0.3)">
+      <div class="arch-layer-title" style="color:var(--accent)">用户交互层</div>
+      <div class="arch-modules">
+        <span class="arch-module">Web 工作台</span>
+        <span class="arch-module">移动端 H5</span>
+        <span class="arch-module">平台插件（淘宝/抖店）</span>
+        <span class="arch-module">Open API</span>
+      </div>
+    </div>
+    <div class="arch-layer" style="border-color:rgba(251,146,60,0.3)">
+      <div class="arch-layer-title" style="color:var(--accent2)">业务编排层</div>
+      <div class="arch-modules">
+        <span class="arch-module">任务调度器</span>
+        <span class="arch-module">并行推理引擎</span>
+        <span class="arch-module">质量网关</span>
+        <span class="arch-module">风控过滤</span>
+        <span class="arch-module">回退路径</span>
+      </div>
+    </div>
+    <div class="arch-layer" style="border-color:rgba(167,139,250,0.3)">
+      <div class="arch-layer-title" style="color:var(--accent3)">AI 模型层（可插拔）</div>
+      <div class="arch-modules">
+        <span class="arch-module">文案 LLM（Qwen 微调）</span>
+        <span class="arch-module">图像 SDXL+ControlNet</span>
+        <span class="arch-module">抠图 U²-Net</span>
+        <span class="arch-module">TTS 配音</span>
+        <span class="arch-module">视频模板引擎</span>
+        <span class="arch-module">闭源 API 兜底</span>
+      </div>
+    </div>
+    <div class="arch-layer" style="border-color:rgba(34,197,94,0.3)">
+      <div class="arch-layer-title" style="color:#4ade80">数据 / 资产层</div>
+      <div class="arch-modules">
+        <span class="arch-module">品牌套件库</span>
+        <span class="arch-module">模板 / LoRA 资产</span>
+        <span class="arch-module">平台风格词库</span>
+        <span class="arch-module">用户素材仓库</span>
+        <span class="arch-module">评测日志</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="page-footer">
+  <div class="footer-nav">
+    <a href="index.html" class="footer-btn">← 返回主页</a>
+    <a href="project-stock-agent.html" class="footer-btn primary">查看 Stock Agent →</a>
+  </div>
+  <p style="font-size:0.8rem;color:var(--text-muted)">© 2025 胡嘉凡 · AI Product Manager</p>
+</div>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e,i) => {
+      if(e.isIntersecting){
+        e.target.style.transitionDelay = (i*0.06)+'s';
+        e.target.classList.add('visible');
+        obs.unobserve(e.target);
+      }
+    });
+  }, {threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+  // Tab switching
+  document.querySelectorAll('.out-tab').forEach((tab, i) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>飞书 AI 助手 · 胡嘉凡</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f; --surface: #111118; --surface2: #1a1a26;
+      --border: rgba(255,255,255,0.08);
+      --accent: #1456f0; --accent2: #06b6d4; --accent3: #4ade80;
+      --text: #e8e8f0; --text-muted: #8888a8; --glow: rgba(20,86,240,0.3);
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter','PingFang SC','Microsoft YaHei',sans-serif; line-height: 1.6; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 5%; height: 64px; background: rgba(10,10,15,0.8); backdrop-filter: blur(18px); border-bottom: 1px solid var(--border); }
+    .nav-logo { font-size: 1rem; font-weight: 700; background: linear-gradient(135deg,#7c6af7,#4fc3f7); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-back { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); border: 1px solid var(--border); padding: 7px 16px; border-radius: 8px; transition: all 0.2s; }
+    .nav-back:hover { color: var(--text); border-color: rgba(20,86,240,0.5); }
+
+    .proj-hero { position: relative; min-height: 460px; display: flex; align-items: flex-end; padding: 120px 5% 60px; overflow: hidden; background: linear-gradient(135deg, #08080f 0%, #0a1020 50%, #0c1530 100%); }
+    .hero-orb { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+    .orb1 { width: 500px; height: 500px; background: rgba(20,86,240,0.12); top: -100px; right: -50px; }
+    .orb2 { width: 350px; height: 350px; background: rgba(6,182,212,0.08); bottom: -80px; left: 10%; }
+    .hero-content { position: relative; z-index: 1; max-width: 800px; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem; transition: color 0.2s; }
+    .back-link:hover { color: var(--accent); }
+    .hero-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.2rem; }
+    .badge { font-size: 0.72rem; padding: 4px 12px; border-radius: 20px; font-weight: 700; }
+    .badge-blue { background: rgba(20,86,240,0.15); color: #6b9fff; border: 1px solid rgba(20,86,240,0.3); }
+    .badge-cyan { background: rgba(6,182,212,0.12); color: var(--accent2); border: 1px solid rgba(6,182,212,0.25); }
+    .badge-green { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
+    h1 { font-size: clamp(2rem,5vw,3.2rem); font-weight: 800; letter-spacing: -1.5px; line-height: 1.15; margin-bottom: 1rem; }
+    .gradient-text { background: linear-gradient(135deg,#fff 20%,#6b9fff 60%,var(--accent2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-desc { font-size: 1.05rem; color: var(--text-muted); max-width: 640px; line-height: 1.8; }
+    .hero-meta { display: flex; gap: 2rem; margin-top: 2rem; flex-wrap: wrap; }
+    .meta-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+    .meta-value { font-size: 0.9rem; font-weight: 600; }
+
+    .content { max-width: 900px; margin: 0 auto; padding: 80px 5%; }
+    .section { margin-bottom: 5rem; }
+    .section-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #6b9fff; margin-bottom: 0.6rem; }
+    h2 { font-size: clamp(1.4rem,3vw,1.9rem); font-weight: 800; letter-spacing: -0.5px; margin-bottom: 1.2rem; }
+    h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.6rem; }
+    p { color: var(--text-muted); line-height: 1.8; margin-bottom: 1rem; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 4rem 0; }
+
+    /* Impact */
+    .impact-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+    .impact-card { border-radius: 14px; padding: 1.3rem; border: 1px solid; }
+    .impact-card.blue { background: rgba(20,86,240,0.06); border-color: rgba(20,86,240,0.2); }
+    .impact-card.cyan { background: rgba(6,182,212,0.06); border-color: rgba(6,182,212,0.2); }
+    .impact-card.green { background: rgba(74,222,128,0.06); border-color: rgba(74,222,128,0.2); }
+    .impact-card.purple { background: rgba(124,106,247,0.06); border-color: rgba(124,106,247,0.2); }
+    .impact-num { font-size: 1.6rem; font-weight: 800; }
+    .impact-card.blue .impact-num { color: #6b9fff; }
+    .impact-card.cyan .impact-num { color: var(--accent2); }
+    .impact-card.green .impact-num { color: #4ade80; }
+    .impact-card.purple .impact-num { color: #a78bfa; }
+    .impact-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* 架构层 */
+    .arch-layer { margin-bottom: 1.2rem; }
+    .arch-layer-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #6b9fff; margin-bottom: 0.5rem; }
+    .arch-items { display: flex; flex-wrap: wrap; gap: 8px; }
+    .arch-item { padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 500; }
+    .arch-item.blue { background: rgba(20,86,240,0.1); color: #6b9fff; border: 1px solid rgba(20,86,240,0.2); }
+    .arch-item.cyan { background: rgba(6,182,212,0.1); color: var(--accent2); border: 1px solid rgba(6,182,212,0.2); }
+    .arch-item.green { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+    .arch-item.purple { background: rgba(124,106,247,0.1); color: #a78bfa; border: 1px solid rgba(124,106,247,0.2); }
+    .arch-item.gray { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+    .arch-arrow { text-align: center; color: var(--text-muted); font-size: 1.1rem; margin: 0.3rem 0; }
+
+    /* Skills grid */
+    .skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+    .skill-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.2rem; transition: all 0.2s; }
+    .skill-card:hover { border-color: rgba(20,86,240,0.4); transform: translateY(-2px); }
+    .skill-icon { font-size: 1.6rem; margin-bottom: 0.6rem; }
+    .skill-card h3 { font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .skill-card p { font-size: 0.78rem; margin: 0; }
+
+    /* 每日报告卡片模拟 */
+    .report-card { background: var(--surface); border: 1px solid rgba(20,86,240,0.2); border-radius: 16px; overflow: hidden; max-width: 600px; }
+    .report-header { background: linear-gradient(135deg,rgba(20,86,240,0.15),rgba(6,182,212,0.08)); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; }
+    .report-title { font-size: 0.88rem; font-weight: 700; }
+    .report-date { font-size: 0.72rem; color: var(--text-muted); }
+    .report-body { padding: 1.2rem 1.4rem; }
+    .report-section { margin-bottom: 1.2rem; }
+    .report-section-title { font-size: 0.78rem; font-weight: 700; color: #6b9fff; letter-spacing: 0.5px; margin-bottom: 0.6rem; text-transform: uppercase; }
+    .sector-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: 8px; background: var(--surface2); margin-bottom: 6px; }
+    .sector-num { width: 20px; height: 20px; border-radius: 50%; background: rgba(20,86,240,0.2); color: #6b9fff; font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sector-name { font-size: 0.82rem; font-weight: 700; }
+    .sector-logic { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .stock-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+    .stock-table th { text-align: left; padding: 6px 8px; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+    .stock-table td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .stock-table tr:last-child td { border: none; }
+    .up { color: #f87171; }
+    .target { color: #4ade80; }
+    .stop { color: #fb923c; }
+
+    /* Flow */
+    .flow { display: flex; flex-direction: column; gap: 0; }
+    .flow-step { display: flex; gap: 1.2rem; align-items: flex-start; }
+    .flow-line { display: flex; flex-direction: column; align-items: center; }
+    .flow-dot { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg,#1456f0,#06b6d4); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .flow-connector { width: 2px; flex: 1; min-height: 24px; background: linear-gradient(to bottom, #1456f0, rgba(20,86,240,0.1)); margin: 4px 0; }
+    .flow-body { padding: 4px 0 28px; }
+    .flow-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .flow-desc { font-size: 0.83rem; color: var(--text-muted); line-height: 1.7; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
+    .tag { padding: 4px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 500; background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); }
+
+    /* CTA */
+    .cta-box { background: linear-gradient(135deg, rgba(20,86,240,0.08), rgba(6,182,212,0.05)); border: 1px solid rgba(20,86,240,0.2); border-radius: 20px; padding: 2.5rem; text-align: center; }
+    .cta-box h3 { font-size: 1.3rem; margin-bottom: 0.6rem; }
+    .cta-box p { font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 24px; border-radius: 10px; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.25s; }
+    .btn-primary { background: linear-gradient(135deg,#1456f0,#0e3fbd); color: #fff; box-shadow: 0 0 24px var(--glow); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px var(--glow); }
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: rgba(20,86,240,0.5); color: #6b9fff; transform: translateY(-2px); }
+    .btn-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    footer { text-align: center; padding: 24px 5%; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted); }
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease, transform 0.5s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    @media (max-width: 640px) {
+      .impact-grid { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">HJF · AIPM</div>
+  <a href="index.html" class="nav-back">← 返回主页</a>
+</nav>
+
+<div class="proj-hero">
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+  <div class="hero-content">
+    <a href="index.html" class="back-link">← 返回主页</a>
+    <div class="hero-badges">
+      <span class="badge badge-green">✓ 已上线</span>
+      <span class="badge badge-blue">2025.10 – 至今</span>
+      <span class="badge badge-cyan">飞书 Bot · SkillHub</span>
+    </div>
+    <h1><span class="gradient-text">飞书 AI 助手</span><br>OpenClaw + SkillHub</h1>
+    <p class="hero-desc">
+      在飞书部署 OpenClaw AI 助手，接入腾讯 SkillHub 扩展自定义技能，
+      实现 A 股每日板块分析 + 股票推荐自动推送、图表绘制、通用问答等能力，
+      将 AI 能力直接嵌入团队日常工作流。
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">角色</div>
+        <div class="meta-value">AI 产品经理（独立搭建）</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">平台</div>
+        <div class="meta-value">飞书 · OpenClaw · 腾讯 SkillHub</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">自定义技能</div>
+        <div class="meta-value">股票分析 / 图表绘制 / 通用问答</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- 核心成果 -->
+  <div class="section reveal">
+    <div class="section-label">Impact</div>
+    <h2>核心成果</h2>
+    <div class="impact-grid">
+      <div class="impact-card blue">
+        <div class="impact-num">每日</div>
+        <div class="impact-label">自动推送 A 股板块分析 + 股票推荐报告</div>
+      </div>
+      <div class="impact-card cyan">
+        <div class="impact-num">5+</div>
+        <div class="impact-label">SkillHub 自定义技能接入</div>
+      </div>
+      <div class="impact-card green">
+        <div class="impact-num">0 代码</div>
+        <div class="impact-label">业务人员自助使用 AI 能力，无需开发介入</div>
+      </div>
+      <div class="impact-card purple">
+        <div class="impact-num">即时</div>
+        <div class="impact-label">飞书内直接对话，无缝融入工作流</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- 每日报告展示 -->
+  <div class="section reveal">
+    <div class="section-label">Daily Report</div>
+    <h2>每日 A 股分析报告推送</h2>
+    <p>系统每个交易日早上自动生成并推送结构化的板块分析与股票推荐，包含入场点位、止盈目标、止损设置与深度分析，降低用户信息收集门槛。</p>
+
+    <div class="report-card" style="margin-top:1.5rem">
+      <div class="report-header">
+        <div class="report-title">📊 A股板块与股票推荐</div>
+        <div class="report-date">03/11 · 早 9:23 自动推送</div>
+      </div>
+      <div class="report-body">
+        <div class="report-section">
+          <div class="report-section-title">一、今日重点关注板块（3个）</div>
+          <div class="sector-item">
+            <div class="sector-num">1</div>
+            <div>
+              <div class="sector-name">零售业</div>
+              <div class="sector-logic">步步高"胖改"21家门店全部盈利，消费复苏背景下品质零售成新趋势</div>
+            </div>
+          </div>
+          <div class="sector-item">
+            <div class="sector-num">2</div>
+            <div>
+              <div class="sector-name">高铁基建</div>
+              <div class="sector-logic">昌九高铁全线隧道全部贯通，"十四五"铁路建设保持高强度</div>
+            </div>
+          </div>
+          <div class="sector-item">
+            <div class="sector-num">3</div>
+            <div>
+              <div class="sector-name">证券板块</div>
+              <div class="sector-logic">华安证券控股股东增持可转债，市场活跃度提升，券商业务有望改善</div>
+            </div>
+          </div>
+        </div>
+        <div class="report-section">
+          <div class="report-section-title">二、今日推荐股票（5只）</div>
+          <table class="stock-table">
+            <thead>
+              <tr>
+                <th>股票</th>
+                <th>板块</th>
+                <th>入场点位</th>
+                <th>止盈</th>
+                <th>止损</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>步步高(002251)</td><td>零售</td><td>6.80–7.20</td><td class="target">8.50</td><td class="stop">6.30</td></tr>
+              <tr><td>中国中铁(601390)</td><td>高铁</td><td>7.50–7.80</td><td class="target">8.80</td><td class="stop">7.10</td></tr>
+              <tr><td>华安证券(600909)</td><td>证券</td><td>5.20–5.50</td><td class="target">6.30</td><td class="stop">4.90</td></tr>
+              <tr><td>京沪高铁(601816)</td><td>铁路</td><td>5.60–5.90</td><td class="target">6.80</td><td class="stop">5.30</td></tr>
+              <tr><td>家家悦(603708)</td><td>零售</td><td>13.50–14.20</td><td class="target">16.50</td><td class="stop">12.80</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-muted);padding-top:0.5rem;border-top:1px solid var(--border)">
+          三、深度分析（两大主题）·零售业转型 · 高铁基建稳增长 → <span style="color:#6b9fff">查看完整报告 →</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SkillHub 自定义技能 -->
+  <div class="section reveal">
+    <div class="section-label">SkillHub Skills</div>
+    <h2>腾讯 SkillHub · 自定义技能</h2>
+    <p>通过腾讯 SkillHub 平台为 OpenClaw 助手扩展专属技能，让 AI 在特定垂直场景下具备更精准的能力，无需自行开发即可快速扩展：</p>
+    <div class="skill-grid" style="margin-top:1.5rem">
+      <div class="skill-card">
+        <div class="skill-icon">📈</div>
+        <h3>股票分析</h3>
+        <p>接入实时行情数据，生成个股深度分析报告，支持基本面、技术面双维度</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">📊</div>
+        <h3>图表绘制</h3>
+        <p>根据数据需求自动生成 K 线图、折线图、柱状图等多种可视化图表</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🗞️</div>
+        <h3>每日资讯摘要</h3>
+        <p>自动抓取并摘要财经新闻，提炼关键信息，每日定时推送到飞书群</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">💬</div>
+        <h3>通用问答</h3>
+        <p>在飞书内直接对话，回答工作相关问题，支持文档解读、代码辅助等场景</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🔔</div>
+        <h3>行情预警</h3>
+        <p>设定价格、涨跌幅阈值，触发条件时自动推送飞书消息提醒</p>
+      </div>
+      <div class="skill-card" style="background:rgba(20,86,240,0.05);border-color:rgba(20,86,240,0.2);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+        <div class="skill-icon">➕</div>
+        <h3 style="font-size:0.85rem;color:var(--text-muted)">持续扩展中...</h3>
+        <p style="font-size:0.75rem">SkillHub 生态持续新增技能</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- 技术架构 -->
+  <div class="section reveal">
+    <div class="section-label">Architecture</div>
+    <h2>系统架构</h2>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;margin-top:0.5rem">
+      <div class="arch-layer">
+        <div class="arch-layer-title">用户交互层</div>
+        <div class="arch-items">
+          <span class="arch-item blue">飞书 · 私聊对话</span>
+          <span class="arch-item blue">飞书 · 群聊推送</span>
+          <span class="arch-item blue">飞书 · 定时任务通知</span>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer">
+        <div class="arch-layer-title">AI 助手层</div>
+        <div class="arch-items">
+          <span class="arch-item cyan">OpenClaw 助手（飞书 Bot）</span>
+          <span class="arch-item cyan">意图识别 & 路由</span>
+          <span class="arch-item cyan">多轮对话管理</span>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer">
+        <div class="arch-layer-title">技能层 · 腾讯 SkillHub</div>
+        <div class="arch-items">
+          <span class="arch-item purple">股票分析 Skill</span>
+          <span class="arch-item purple">图表绘制 Skill</span>
+          <span class="arch-item purple">资讯摘要 Skill</span>
+          <span class="arch-item purple">行情预警 Skill</span>
+          <span class="arch-item purple">通用问答 Skill</span>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer">
+        <div class="arch-layer-title">数据 & 模型层</div>
+        <div class="arch-items">
+          <span class="arch-item green">LLM（多模型支持）</span>
+          <span class="arch-item gray">AKShare 股票数据</span>
+          <span class="arch-item gray">财经新闻 RSS</span>
+          <span class="arch-item gray">图表渲染引擎</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- 与 Stock Agent 的关系 -->
+  <div class="section reveal">
+    <div class="section-label">Integration</div>
+    <h2>与股票 Agent 的协同</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+      <div class="card" style="border-color:rgba(20,86,240,0.2)">
+        <div style="font-size:1.5rem;margin-bottom:0.8rem">📱</div>
+        <h3>飞书 AI 助手</h3>
+        <p style="font-size:0.85rem">嵌入工作流，主动推送，日常低频深度分析，SkillHub 技能扩展，适合在飞书工作场景中快速获取信息</p>
+        <div style="font-size:0.75rem;color:#6b9fff;margin-top:0.5rem">▸ 场景：上班时飞书推送早报，快速决策</div>
+      </div>
+      <div class="card" style="border-color:rgba(124,106,247,0.2)">
+        <div style="font-size:1.5rem;margin-bottom:0.8rem">🖥️</div>
+        <h3>Stock Agent Web</h3>
+        <p style="font-size:0.85rem">完整 Web 界面，深度交互，多轮追问，8 类数据并行，适合需要系统性研究个股、行业对比的深度分析场景</p>
+        <div style="font-size:0.75rem;color:#a78bfa;margin-top:0.5rem">▸ 场景：收盘后深度研究，制定投资策略</div>
+      </div>
+    </div>
+    <p style="margin-top:1.2rem;font-size:0.88rem">两个产品形成互补：飞书助手负责<strong style="color:#6b9fff">主动触达 + 日常轻量</strong>，Stock Agent Web 负责<strong style="color:#a78bfa">深度分析 + 系统研究</strong>，共同覆盖投资者从"被动感知"到"主动决策"的完整链路。</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- 我的工作 -->
+  <div class="section reveal">
+    <div class="section-label">My Work</div>
+    <h2>我的产品工作</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-dot">1</div><div class="flow-connector"></div></div>
+        <div class="flow-body">
+          <div class="flow-title">平台选型与集成方案</div>
+          <div class="flow-desc">调研飞书机器人生态，选择 OpenClaw 作为 AI 助手框架，评估腾讯 SkillHub 与自研技能的成本与效果，最终采用 SkillHub 快速扩展专业能力，降低开发门槛。</div>
+          <div class="tags"><span class="tag">平台选型</span><span class="tag">技术评估</span><span class="tag">集成方案设计</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-dot">2</div><div class="flow-connector"></div></div>
+        <div class="flow-body">
+          <div class="flow-title">每日推报内容设计</div>
+          <div class="flow-desc">设计结构化的每日 A 股报告格式：板块逻辑 → 关联概念股 → 推荐标的（含入场点位/止盈/止损）→ 深度主题分析，平衡信息密度与可读性，让用户 5 分钟内完成早间决策。</div>
+          <div class="tags"><span class="tag">内容结构设计</span><span class="tag">Prompt 工程</span><span class="tag">信息架构</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-dot">3</div><div class="flow-connector"></div></div>
+        <div class="flow-body">
+          <div class="flow-title">SkillHub 技能配置与调优</div>
+          <div class="flow-desc">在腾讯 SkillHub 平台配置股票分析、图表绘制等自定义技能，设计技能的触发词与输出格式，通过多轮测试优化模型 Prompt，确保各技能在飞书场景下准确响应。</div>
+          <div class="tags"><span class="tag">技能配置</span><span class="tag">Prompt 调优</span><span class="tag">效果验证</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-dot">4</div><div class="flow-connector"></div></div>
+        <div class="flow-body">
+          <div class="flow-title">用户场景与增长设计</div>
+          <div class="flow-desc">定义飞书助手的核心使用场景（早报订阅、即时问答、行情预警），设计用户引导流程，推动从个人使用到团队协作的规模化路径，形成与 Stock Agent Web 端的产品矩阵。</div>
+          <div class="tags"><span class="tag">场景设计</span><span class="tag">用户引导</span><span class="tag">产品矩阵</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="cta-box reveal">
+    <h3>感兴趣？欢迎交流</h3>
+    <p style="color:var(--text-muted)">如果你也在探索 AI 能力与企业工具的融合，欢迎联系我交流。</p>
+    <div class="btn-group">
+      <a href="index.html#contact" class="btn btn-primary">联系我</a>
+      <a href="project-stock-agent.html" class="btn btn-outline">查看 Stock Agent →</a>
+      <a href="index.html" class="btn btn-outline">← 返回主页</a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>© 2025 胡嘉凡 · UCL 健康数据科学 / CS 硕士 · AI Product Manager</p>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        e.target.style.transitionDelay = (i * 0.07) + 's';
+        e.target.classList.add('visible');
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
